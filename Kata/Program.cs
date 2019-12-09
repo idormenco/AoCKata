@@ -1458,28 +1458,28 @@ namespace Kata
             {
                 //Console.WriteLine($"#{l.Index} - {string.Join(Environment.NewLine, l.Pixels.Select(x=>string.Join("",x)))}");
 
-                var nrOf0 = l.Pixels.SelectMany(x=>x).Count(x => x == 0);
-                if(nrOf0 < minOf0)
+                var nrOf0 = l.Pixels.SelectMany(x => x).Count(x => x == 0);
+                if (nrOf0 < minOf0)
                 {
                     minOf0 = nrOf0;
                     maxMul = l.Pixels.SelectMany(x => x).Count(x => x == 1) * l.Pixels.SelectMany(x => x).Count(x => x == 2);
                 }
             }
-            Encoding cp437 = Encoding.GetEncoding("iso-8859-1");
-            string s = cp437.GetString(new byte [] { 189 });
-            for (int i = 0; i < 6; i++)
-            {
-                for (int j = 0; j < 25; j++)
-                {
-                    int pixel = list.Select(x => x.Pixels[i][j]).First(x=>x !=2);
-                    Console.ForegroundColor = pixel==0?ConsoleColor.Green: ConsoleColor.Red;
-                    Console.Write("█");
-                }
-
-                Console.WriteLine();
-            }
-
             Console.WriteLine(maxMul);
+
+            //for (int i = 0; i < 6; i++)
+            //{
+            //    for (int j = 0; j < 25; j++)
+            //    {
+            //        int pixel = list.Select(x => x.Pixels[i][j]).First(x => x != 2);
+            //        Console.ForegroundColor = pixel == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+            //        Console.Write("█");
+            //    }
+
+            //    Console.WriteLine();
+            //}
+            List<int[]> image = ImageLoader.ReduceLayers(list,25,6);
+            ImageLoader.PrintImage(image, 25, 6);
             #endregion
 
         }

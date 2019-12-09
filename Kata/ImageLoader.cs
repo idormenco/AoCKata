@@ -26,6 +26,39 @@ namespace Kata
             return layers;
         }
 
+        public static List<int[]> ReduceLayers(List<Layer> layers, int lengthOfLayer, int heightOfLayer)
+        {
+            var lst = new List<int[]>();
+
+            for (int i = 0; i < heightOfLayer; i++)
+            {
+                var row = new int[lengthOfLayer];
+                for (int j = 0; j < lengthOfLayer; j++)
+                {
+                    int pixel = layers.Select(x => x.Pixels[i][j]).First(x => x != 2);
+                    row[j] = pixel;
+                }
+
+                lst.Add(row);
+            }
+
+            return lst;
+        }
+
+        public static void PrintImage(List<int[]> image, int lengthOfLayer, int heightOfLayer)
+        {
+            for (int i = 0; i < heightOfLayer; i++)
+            {
+                for (int j = 0; j < lengthOfLayer; j++)
+                {
+                    Console.ForegroundColor = image[i][j] == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+                    Console.Write("█");
+                }
+
+                Console.WriteLine();
+            }
+        }
+
         public static IEnumerable<IEnumerable<T>> Batch<T>(this IEnumerable<T> items,
                                                        int maxItems)
         {
