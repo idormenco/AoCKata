@@ -39,10 +39,12 @@ namespace Kata
             return memmory;
         }
 
-        public static (State state, long[] memory, long cursor, Queue<long> inputMemory, long output) IntCodeNew(long[] memory, Queue<long> inputMemory, long cursor)
+        public static (State state, long[] memory, long cursor, Queue<long> inputMemory, Queue<long> output) IntCodeNew(long[] memory, Queue<long> inputMemory, long cursor)
         {
-            long output = -1;
+            //long output = -1;
             var shouldStop = false;
+            long relativeBase = 0;
+            Queue<long> output = new Queue<long>();
             do
             {
                 if (memory[cursor] == 99)
@@ -53,7 +55,7 @@ namespace Kata
                 var b = memory[cursor + 2];
 
 
-                var instruction = DecomposeInstruction(memory, memory[cursor], a, b);
+                var instruction = DecomposeInstruction(memory, memory[cursor], relativeBase, a, b);
 
                 if (instruction.op == Operations.Sum)
                 {
@@ -68,9 +70,10 @@ namespace Kata
 
                 if (instruction.op == Operations.WriteToOutput)
                 {
-                    output = memory[memory[cursor + 1]];
+                    output.Enqueue(memory[memory[cursor + 1]]);
                     cursor += 2;
                 }
+
                 if (instruction.op == Operations.ReadFromOutput)
                 {
                     if (inputMemory.Count == 0)
@@ -110,10 +113,16 @@ namespace Kata
                     memory[memory[cursor + 3]] = instruction.param1.Value < instruction.param2.Value ? 1 : 0;
                     cursor += 4;
                 }
+
                 if (instruction.op == Operations.Equals)
                 {
                     memory[memory[cursor + 3]] = instruction.param1.Value == instruction.param2.Value ? 1 : 0;
                     cursor += 4;
+                }
+
+                if (instruction.op == Operations.AdjustRelativeBase) 
+                {
+                    relativeBase += instruction.param1.Value;
                 }
             } while (shouldStop == false);
 
@@ -121,7 +130,7 @@ namespace Kata
             return (State.Stop, memory, cursor, inputMemory, output);
         }
 
-        private static (Operations op, long? param1, long? param2) DecomposeInstruction(long[] memory, long instruction, long param1Pointer, long param2Pointer)
+        private static (Operations op, long? param1, long? param2) DecomposeInstruction(long[] memory, long instruction, long baseIndex,long param1Pointer, long param2Pointer)
         {
             var op = (Operations)(instruction % 10);
             var i = (instruction - (long)op) / 100;
@@ -141,6 +150,10 @@ namespace Kata
             {
                 param1 = param1Pointer;
             }
+            else if (param1ReadMode == 1)
+            {
+                param1 = memory[baseIndex + param1Pointer];
+            }
             else
             {
                 throw new Exception("param1 read mode ");
@@ -150,20 +163,23 @@ namespace Kata
             if (param2ReadMode == 0)
             {
                 param2 = memory[param2Pointer];
-
             }
             else if (param2ReadMode == 1)
             {
                 param2 = param2Pointer;
+            }
+            else if (param2ReadMode == 2)
+            {
+                param2 = memory[baseIndex + param2Pointer];
             }
             else
             {
                 throw new Exception("param2 read mode ");
             }
 
+
             return (op, param1, param2);
         }
-
         private enum Operations
         {
             None = 0,
@@ -174,7 +190,8 @@ namespace Kata
             JumpIfTrue = 5,
             JumpIfFalse = 6,
             LessThan = 7,
-            Equals = 8
+            Equals = 8,
+            AdjustRelativeBase = 9
         }
 
         public enum State
